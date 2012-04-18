@@ -2,52 +2,72 @@
 
 class Server {
   
-  public $username;
-  public $password;
-  public $api;
-  public $config;
-  
-  private $_api;
-  private $_config;
-  
-  public function open() {
-	  
-	$api = $this->api;
-	$username = $this->username;
-	$password = $this->password;
-	$config = $this->config;
-	  
-    $this->_api = $api;
-    $this->_config = $config;
-    $login = $this->request('login', array(
-      'lgname' => $username,
-      'lgpassword' => $password
-    ));
+	public $username;
+	public $password;
+	public $api;
+	public $config;
 
-    if($login && $login->login->result == 'NeedToken' && property_exists($login->login, 'token')) {
-      $token = $login->login->token;
-      $login = $this->request('login', array(
-        'lgname' => $username,
-        'lgpassword' => $password,
-        'lgtoken' => $token
-      ));
+	private $_api;
+	private $_config;
+  
+	public function open() {
+	  
+		$request = new JsonHttpRequest;
+		$logger = new Logger;
 
-      if($login && property_exists($login->login, 'lgusername')) {
-        echo "[$api] Logged in as: " . $login->login->lgusername . "\n";
-        return TRUE;
-      } else {
-        throw new Exception('MediaWiki Login failure after second attempt: ' . json_encode($login));
-      }
-    } else {
-      throw new Exception('MediaWiki Login failure: ' . json_encode($login));
-    }
-  }
+		$request->url = $this->api;
+		$request->method = 'POST';
+		$request->query->action = 'login';
+		$request->query->format = 'json';
+		$request->query->lgname = $this->username;
+		$request->query->lgpassword = $this->password;
+
+		$logger->info('Login to '.$request->url);
+		
+		if (!$response = $request->send()) {
+			return false;
+		}
+
+		if ($response->login->result == 'NeedToken') {
+			$request->query->lgtoken = $response->login->token;
+			if (!$response = $request->send()) {
+				return false;
+			}
+			if ($response->login->result == 'Success') {
+				$logger->info('Logged as "'.$this->username.'"');
+				return true;
+			}
+		}
+		
+		return false;
+	}
 	
 	public function getPages() {
-		$response = $this->request(
-			 'query'
-			, array('list'=>'allpages', 'aplimit'=>5000)
-			);
+		
+		$request = new JsonHttpRequest;
+		$logger = new Logger;
+		
+		$request->url = $this->api;
+		$request->method = 'POST';
+		$request->query->action = 'query';
+		$request->query->format = 'json';
+		$request->query->list = 'allpages';
+		$request->query->aplimit = 5000;
+		
+		/**
+		 * @note 
+		 * - you can use aplimit (maximum number of pages returned)
+		 *   and apfrom (name of a page) to optimize the query
+		 * 
+		 * @example
+		 * $request->query->aplimit = 3;
+		 * $request->query->apfrom = "Main Page";
+		 **/
+		
+		if (!$response = $request->send()) {
+			return false;
+		}
+		
 		return $response->query->allpages;
 	}
   
