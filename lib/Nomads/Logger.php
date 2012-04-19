@@ -1,6 +1,6 @@
 <?php
 
-class Logger {
+class Nomads_Logger {
 	
 	public static function info($message) {
 		echo date('H:i:s').' INFO '.$message."\n";

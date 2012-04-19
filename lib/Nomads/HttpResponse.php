@@ -1,6 +1,6 @@
 <?php
 
-class HttpResponse {
+class Nomads_HttpResponse {
 	
 	private $header;
 	private $body;

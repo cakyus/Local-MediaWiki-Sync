@@ -1,6 +1,6 @@
 <?php
 
-class JsonHttpRequest extends HttpRequest {
+class Nomads_JsonHttpRequest extends Nomads_HttpRequest {
 	
 	public function __construct() {
 		parent::__construct();

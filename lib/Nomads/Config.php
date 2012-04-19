@@ -1,6 +1,6 @@
 <?php
 
-class Database {
+class Nomads_Config {
 
 	private $config;
 

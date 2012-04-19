@@ -1,6 +1,6 @@
 <?php
 
-class HttpRequest {
+class Nomads_HttpRequest {
 	
 	public $url;
 	public $method;
