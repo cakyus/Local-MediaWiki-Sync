@@ -16,15 +16,13 @@ class Nomads_HttpRequest {
 		// set default configurations
 		$this->method = 'GET';
 		$this->query = new stdClass;
-		$this->cookies = dirname(
-			dirname(__FILE__)
-			).'/data/cookies.txt';
+		$this->cookies = sys_get_temp_dir().'/cookies.txt';
 		$this->isGetHeader = true;
 	}
 	
 	public function send() {
 		
-		$response = new HttpResponse;
+		$response = new Nomads_HttpResponse;
 		
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_COOKIEFILE, $this->cookies);
