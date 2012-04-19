@@ -1,6 +1,6 @@
 <?php
 
-class Server {
+class MediaWiki_Server {
   
 	public $username;
 	public $password;
@@ -12,11 +12,10 @@ class Server {
   
 	public function open() {
 	  
-		$request = new JsonHttpRequest;
-		$logger = new Logger;
+		$request = new Nomads_JsonHttpRequest;
+		$logger = new Nomads_Logger;
 
 		$request->url = $this->api;
-		$request->method = 'POST';
 		$request->query->action = 'login';
 		$request->query->format = 'json';
 		$request->query->lgname = $this->username;
@@ -44,11 +43,10 @@ class Server {
 	
 	public function getPages() {
 		
-		$request = new JsonHttpRequest;
-		$logger = new Logger;
+		$request = new Nomads_JsonHttpRequest;
+		$logger = new Nomads_Logger;
 		
 		$request->url = $this->api;
-		$request->method = 'POST';
 		$request->query->action = 'query';
 		$request->query->format = 'json';
 		$request->query->list = 'allpages';
