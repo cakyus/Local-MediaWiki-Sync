@@ -5,11 +5,7 @@ class MediaWiki_Server {
 	public $username;
 	public $password;
 	public $api;
-	public $config;
-
-	private $_api;
-	private $_config;
-  
+	
 	public function open() {
 	  
 		$request = new Nomads_JsonHttpRequest;
@@ -33,11 +29,24 @@ class MediaWiki_Server {
 				return false;
 			}
 			if ($response->login->result == 'Success') {
-				$logger->info('Logged as "'.$this->username.'"');
+				$logger->info('Logged as '
+					.$this->username.'@'.$this->getDomain()
+					);
 				return true;
 			}
 		}
 		
+		return false;
+	}
+	
+	/**
+	 * Get domain of the server
+	 **/
+	
+	public function getDomain() {
+		if (preg_match("/(http|https):\/\/([^\/]+)/", $this->api,$match)) {
+			return $match[2];
+		}
 		return false;
 	}
 	
@@ -50,7 +59,7 @@ class MediaWiki_Server {
 		$request->query->action = 'query';
 		$request->query->format = 'json';
 		$request->query->list = 'allpages';
-		$request->query->aplimit = 5000;
+		$request->query->aplimit = 5;
 		
 		/**
 		 * @note 
@@ -66,9 +75,46 @@ class MediaWiki_Server {
 			return false;
 		}
 		
-		return $response->query->allpages;
+		$pages = new Nomads_Iterator;
+		foreach ($response->query->allpages as $p) {
+			$page = new MediaWiki_Page($this);
+			$page->id = $p->pageid;
+			$page->namespace = $p->ns;
+			$page->title = $p->title;
+			$pages->add($page);
+		}
+		
+		return $pages;
 	}
-  
+	
+	public function getPageByTitle($title) {
+		
+		$request = new Nomads_JsonHttpRequest;
+		$logger = new Nomads_Logger;
+		
+		$request->url = $this->api;
+		$request->query->action = 'query';
+		$request->query->format = 'json';
+		// $request->query->list = 'allpages';
+		$request->query->titles = $title;
+		
+		if (!$response = $request->send()) {
+			return false;
+		}
+		
+		$p = current($response->query->pages);
+		
+		if (isset($p->pageid)) {
+			$page = new MediaWiki_Page($this);
+			$page->id = $p->pageid;
+			$page->namespace = $p->ns;
+			$page->title = $p->title;
+			return $page;
+		}
+		
+		return false;
+	}
+	
   public function request($action, $params=FALSE) {
     $ch = curl_init();
     $cwd = dirname(__FILE__);
@@ -108,7 +154,7 @@ class MediaWiki_Server {
     return curl_exec($ch);
   }
   
-  public function getPageByTitle($title) {
+  public function getPageByTitle2($title) {
     $ch = curl_init();
     $cwd = dirname(__FILE__);
     curl_setopt($ch, CURLOPT_COOKIEFILE, $cwd . '/cookies.txt');
