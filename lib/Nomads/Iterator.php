@@ -28,7 +28,7 @@ foreach($it as $key => $value) {
 class Nomads_Iterator implements Iterator {
 
     private $position = 0;
-    private $array = array();
+    private $data = array();
 
     public function __construct() {
         $this->position = 0;
@@ -39,7 +39,7 @@ class Nomads_Iterator implements Iterator {
     }
 
     public function current() {
-        return $this->array[$this->position];
+        return $this->data[$this->position];
     }
 
     public function key() {
@@ -51,16 +51,24 @@ class Nomads_Iterator implements Iterator {
     }
 
     public function valid() {
-		if (!isset($this->array[$this->position])) {
+		if (!isset($this->data[$this->position])) {
 			$element = $this->fetch();
 			if (!empty($element)){
-				$this->array[] = $element;
+				$this->data[] = $element;
 			}
 		}
-        return isset($this->array[$this->position]);
+        return isset($this->data[$this->position]);
     }
     
 	protected function fetch() {
 		return false;
+	}
+	
+	public function add($element) {
+		if (is_array($element)) {
+			$this->data = array_merge($this->data, $element);
+		} else {
+			$this->data[] = $element;
+		}
 	}
 }
