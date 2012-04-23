@@ -7,7 +7,7 @@ class Nomads_Config {
 	public function __construct() {
 
 		$this->config = new StdClass;
-		$this->config->filename = 'data/Database.json';
+		$this->config->filename = 'data/Config.json';
 
 		if (is_file($this->config->filename) == false) {
 			$this->config->data = new StdClass;
