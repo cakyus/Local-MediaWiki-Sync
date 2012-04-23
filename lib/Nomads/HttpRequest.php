@@ -23,6 +23,7 @@ class Nomads_HttpRequest {
 	public function send() {
 		
 		$response = new Nomads_HttpResponse;
+		$logger = new Nomads_Logger;
 		
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_COOKIEFILE, $this->cookies);
@@ -60,6 +61,10 @@ class Nomads_HttpRequest {
 			}
 		} else {
 			$response->setBody(curl_exec($ch));
+		}
+		
+		if ($error = curl_error($ch)) {
+			$logger->warn($error);
 		}
 		
 		return $response;
